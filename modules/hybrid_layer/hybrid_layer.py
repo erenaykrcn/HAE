@@ -3,10 +3,15 @@ import torch.nn as nn
 from torch.autograd import Function
 import numpy as np
 
+import os
+dirname = os.path.dirname(__file__)
+import sys
+sys.path.append(os.path.join(dirname, '../PQC'))
+from PQC import PQC
+
 
 class HybridFunction(Function):
-    """ Hybrid quantum - classical function definition """
-    
+	""" Hybrid quantum - classical function definition """
 	@staticmethod
 	def forward(ctx, x, quantum_circuit, shift):
 		""" Forward pass computation """
@@ -17,18 +22,17 @@ class HybridFunction(Function):
 		expectation_z = ctx.quantum_circuit.run(x[0].tolist())
 		result = torch.tensor([expectation_z])
 		ctx.save_for_backward(input, result)
-
 		return result
-        
+
 	@staticmethod
-    def backward(ctx, grad_output):
+	def backward(ctx, grad_output):
 		""" Backward pass computation """
 		x, expectation_z = ctx.saved_tensors
 		input_list = np.array(x.tolist())
 
 		shift_right = input_list + np.ones(input_list.shape) * ctx.shift
 		shift_left = input_list - np.ones(input_list.shape) * ctx.shift
-        
+
 		gradients = []
 		for i in range(len(input_list)):
 			expectation_right = ctx.quantum_circuit.run(shift_right[i])
@@ -43,9 +47,9 @@ class HybridFunction(Function):
 class HybridLayer(nn.Module):
     """ Hybrid quantum - classical layer definition """
     
-    def __init__(self, backend, shots, shift):
+    def __init__(self, backend, shots, shift, qc_index):
         super(HybridLayer, self).__init__()
-        self.quantum_circuit = PQC(4, backend, shots)
+        self.quantum_circuit = PQC(4, backend, shots, qc_index)
         self.shift = shift
         
     def forward(self, x):

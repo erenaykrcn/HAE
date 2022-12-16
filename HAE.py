@@ -4,14 +4,13 @@ import numpy as np
 
 from qiskit import Aer
 
-from modules.classical_autoencoder import ClassicalAutoencoder
 from modules.PQC import PQC
-from modules.hybrid_layer import HybridLayer
+from modules.hybrid_layer.hybrid_layer import HybridLayer
 from modules.preprocessing.preprocessing import preprocess
 
 
 class HAE(nn.Module):
-	def __init__(self, epochs=100, batchSize=128, learningRate=1e-3):
+	def __init__(self, qc_index=0, epochs=100, batchSize=128, learningRate=1e-3):
 		super(HAE, self).__init__()
 		self.encoder = nn.Sequential(nn.Linear(36, 18),
 									nn.Tanh(),
@@ -19,7 +18,7 @@ class HAE(nn.Module):
 									nn.Tanh(),
 									nn.Linear(9, 4),
 									nn.Tanh())
-		self.hybrid_layer = HybridLayer(Aer.get_backend('aer_simulator'), 100, np.pi / 2)
+		self.hybrid_layer = HybridLayer(Aer.get_backend('aer_simulator'), 100, np.pi / 2, qc_index)
 		self.decoder = nn.Sequential(nn.Linear(4, 9),
 									nn.Tanh(),
 									nn.Linear(9, 18),
@@ -73,5 +72,5 @@ class HAE(nn.Module):
 		torch.save(best_params, os.path.join(dirname, f'./data/training_results/training_result_loss_{round(min_loss, 3)}'))
 
 
-hae = HAE()
+hae = HAE(qc_index=1)
 hae.train()

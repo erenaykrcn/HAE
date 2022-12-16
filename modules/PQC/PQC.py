@@ -1,19 +1,22 @@
 from qiskit import QuantumCircuit, transpile, assemble
 from qiskit.circuit import ParameterVector
-from circuits.circuit_map import circuit_map
+
+import os
+dirname = os.path.dirname(__file__)
+import sys
+sys.path.append(os.path.join(dirname, './circuits'))
+from circuit_map import circuit_map
 
 
 class PQC():
-	""" 
+    """ 
     This class implements a simple interface for 
     interaction with the parametrized quantum circuit. 
     """
-
     def __init__(self, n_qubits, backend, shots, qc_index=0, custom_qc={}):
-
         if custom_qc:
             # TODO: Placeholder QC
-    	   self._circuit = QuantumCircuit(n_qubits)
+            self._circuit = QuantumCircuit(n_qubits)
         elif qc_index:
             self._circuit = circuit_map[qc_index](n_qubits, x, self.theta)
         else:

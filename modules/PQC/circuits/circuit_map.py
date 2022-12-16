@@ -1,4 +1,4 @@
-from circuits import (pqc1, )
+from pqc1 import pqc1
 
 
 circuit_map = {
