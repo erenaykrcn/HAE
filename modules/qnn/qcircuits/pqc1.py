@@ -1,9 +1,8 @@
 from qiskit import QuantumCircuit
 
 
-def pqc1(n_qubits, x, theta):
-	qc1 = QuantumCircuit(n_qubits)
-
+def pqc1(x, theta):
+	qc1 = QuantumCircuit(4)
 	qc1.rx(x[0], 0)
 	qc1.rx(x[1], 1)
 	qc1.rx(x[2], 2)
