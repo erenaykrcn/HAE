@@ -12,7 +12,7 @@ from modules.preprocessing.preprocessing import preprocess
 
 
 class HAE(nn.Module):
-	def __init__(self, qc_index=0, custom_qc={}, epochs=100, batchSize=128, learningRate=1e-3):
+	def __init__(self, qc_index=0, custom_qc={}, epochs=25, batchSize=128, learningRate=1e-3):
 		super(HAE, self).__init__()
 		self.encoder = nn.Sequential(
 									nn.Linear(36, 18),

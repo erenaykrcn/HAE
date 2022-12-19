@@ -1,7 +1,5 @@
 import numpy as np
-import torchvision
 from torch.autograd import Variable
-from torchvision.utils import save_image
 import matplotlib.pyplot as plt
 
 
@@ -77,3 +75,6 @@ class ClassicalAutoencoder(nn.Module):
 
 		torch.save(best_params, os.path.join(dirname, f'../../data/training_results/training_result_loss_{round(min_loss, 3)}'))
 
+
+ae = ClassicalAutoencoder()
+ae.trainClassical()
