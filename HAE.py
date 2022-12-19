@@ -14,7 +14,8 @@ from modules.preprocessing.preprocessing import preprocess
 class HAE(nn.Module):
 	def __init__(self, qc_index=0, custom_qc={}, epochs=100, batchSize=128, learningRate=1e-3):
 		super(HAE, self).__init__()
-		self.encoder = nn.Sequential(nn.Linear(36, 18),
+		self.encoder = nn.Sequential(
+									nn.Linear(36, 18),
 									nn.Tanh(),
 									nn.Linear(18, 9),
 									nn.Tanh(),
@@ -49,11 +50,17 @@ class HAE(nn.Module):
 		"""
 		min_loss = 1
 		best_params = self.state_dict()
-		data_set = preprocess()
+		data_set = preprocess()[0]
 		loss_list = []  # Store loss history
 
 		for epoch in range(self.epochs):
+			total_loss = []
+			i = 0
 			for data in data_set:
+				i += 1
+				if i % 10 == 0:
+					print(i)
+
 				data = Variable(torch.FloatTensor(data))
 				
 				# Predict
@@ -65,7 +72,11 @@ class HAE(nn.Module):
 				self.optimizer.zero_grad()
 				loss.backward()
 				self.optimizer.step()
-			loss_list.append(loss.data)
+				total_loss.append(loss.item())
+
+			average_loss = sum(total_loss) / len(total_loss)
+			loss_list.append(average_loss)
+			print(average_loss)
 
 			if min_loss > loss.item():
 				print("New min loss found!")
