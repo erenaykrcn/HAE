@@ -50,7 +50,7 @@ class HAE(nn.Module):
 		return x
 
 
-	def train(self):
+	def trainHybrid(self):
 		"""
 			The model is trained based on a mean 
 			square root reconstruction loss.
@@ -60,7 +60,7 @@ class HAE(nn.Module):
 
 		data_set = preprocess()[0][:self.n_samples]
 		loss_list = []  # Store loss history
-
+		self.train()
 		print(f"Training Started. \n Data points in Data set: {len(data_set)} \n Epochs: {self.epochs}")
 
 		for epoch in range(self.epochs):
@@ -101,8 +101,8 @@ class HAE(nn.Module):
 
 		path = ''
 		if self.qc_index:
-			path = f'./data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}'
+			path = f'./data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt'
 		elif self.custom_qc:
-			path = f'./data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}'
+			path = f'./data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
 
 		torch.save(best_params, os.path.join(dirname, path))

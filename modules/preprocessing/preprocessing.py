@@ -69,3 +69,22 @@ def visualize_test_data(label, data_index):
 
     relative_file_path = f"../../data/visualized_test_data/statlog/class_{label}_index_{data_index}.png"
     fig_x_test_2.savefig(os.path.join(dirname, relative_file_path))
+
+
+def visualize(data, loss_value, data_index, qc_index=0, custom_qc={}, output=False):
+    array_to_visualize = [[[],[],[]],
+                          [[],[],[]],
+                          [[],[],[]]]
+
+    index = 0
+    for m in range(3):
+        for n in range(3):
+            for i in range(4):
+                array_to_visualize[m][n].append(data[index*4 + i])
+            index += 1
+
+    fig = plt.figure()
+    plt.imshow(array_to_visualize)
+
+    relative_file_path = f"../../data/visualize_constr_data/pqc{qc_index if qc_index else '_custom'}/loss_{loss_value}/{data_index}_{'reconstr' if output else 'original'}.png"
+    fig.savefig(os.path.join(dirname, relative_file_path))
