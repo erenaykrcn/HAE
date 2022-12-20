@@ -106,7 +106,3 @@ class HAE(nn.Module):
 			path = f'./data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}'
 
 		torch.save(best_params, os.path.join(dirname, path))
-
-
-hae = HAE(qc_index=2, n_samples=100)
-hae.train()
