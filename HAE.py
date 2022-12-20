@@ -1,3 +1,6 @@
+import os
+dirname = os.path.dirname(__file__)
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -7,12 +10,12 @@ from qiskit import Aer
 from qiskit_machine_learning.connectors import TorchConnector
 
 from modules.qnn.qnn import create_qnn
-from modules.qnn.utils import convert_prob_to_exp
+from modules.qnn.utils import convert_prob_to_exp_batch
 from modules.preprocessing.preprocessing import preprocess
 
 
 class HAE(nn.Module):
-	def __init__(self, qc_index=0, custom_qc={}, epochs=25, batchSize=128, learningRate=1e-3):
+	def __init__(self, qc_index=0, custom_qc={}, epochs=100, batchSize=128, learningRate=1e-3, n_samples=200):
 		super(HAE, self).__init__()
 		self.encoder = nn.Sequential(
 									nn.Linear(36, 18),
@@ -22,7 +25,8 @@ class HAE(nn.Module):
 									nn.Linear(9, 4),
 									nn.Tanh())
 		self.qnn = TorchConnector(create_qnn(Aer.get_backend('aer_simulator'), 250, qc_index, custom_qc))
-		self.decoder = nn.Sequential(nn.Linear(4, 9),
+		self.decoder = nn.Sequential(
+									nn.Linear(4, 9),
 									nn.Tanh(),
 									nn.Linear(9, 18),
 									nn.Tanh(),
@@ -33,12 +37,15 @@ class HAE(nn.Module):
 		self.learningRate = learningRate
 		self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learningRate, weight_decay=1e-5)
 		self.loss_func = nn.MSELoss()
+		self.qc_index = qc_index
+		self.custom_qc = custom_qc
+		self.n_samples = n_samples
 
 
 	def forward(self, x):
 		x = self.encoder(x)
 		x = self.qnn(x)
-		x = convert_prob_to_exp(x)
+		x = convert_prob_to_exp_batch(x)
 		x = self.decoder(x)
 		return x
 
@@ -50,17 +57,26 @@ class HAE(nn.Module):
 		"""
 		min_loss = 1
 		best_params = self.state_dict()
-		data_set = preprocess()[0]
+
+		data_set = preprocess()[0][:self.n_samples]
 		loss_list = []  # Store loss history
 
-		for epoch in range(self.epochs):
-			total_loss = []
-			i = 0
-			for data in data_set:
-				i += 1
-				if i % 10 == 0:
-					print(i)
+		print(f"Training Started. \n Data points in Data set: {len(data_set)} \n Epochs: {self.epochs}")
 
+		for epoch in range(self.epochs):
+			total_loss = [] 
+
+			data_set = Variable(torch.FloatTensor(data_set))
+			output = self(data_set)
+			loss = torch.sqrt(self.loss_func(output, data_set))
+			self.optimizer.zero_grad()
+			loss.backward()
+			self.optimizer.step()
+			loss_list.append(loss.item())
+			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, loss.item()))
+			average_loss = loss.item()
+
+			"""for data in data_set:
 				data = Variable(torch.FloatTensor(data))
 				
 				# Predict
@@ -76,16 +92,21 @@ class HAE(nn.Module):
 
 			average_loss = sum(total_loss) / len(total_loss)
 			loss_list.append(average_loss)
-			print(average_loss)
+			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, average_loss))"""
 
-			if min_loss > loss.item():
+			if min_loss > average_loss:
 				print("New min loss found!")
 				best_params = self.state_dict()
-				min_loss = loss.item()
-			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, loss.data))
+				min_loss = average_loss
 
-		torch.save(best_params, os.path.join(dirname, f'./data/training_results/training_result_loss_{round(min_loss, 3)}'))
+		path = ''
+		if self.qc_index:
+			path = f'./data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}'
+		elif self.custom_qc:
+			path = f'./data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}'
+
+		torch.save(best_params, os.path.join(dirname, path))
 
 
-hae = HAE(qc_index=2)
+hae = HAE(qc_index=2, n_samples=100)
 hae.train()
