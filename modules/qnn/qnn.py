@@ -17,7 +17,7 @@ def create_qnn(backend, shots, qc_index=0, custom_qc={}):
 	"""
 		Given the qc_index or custom_qc params,
 		it delivers a Quantum Neural Network from
-		Qiskit's EstimatorQNN Class.
+		Qiskit's CircuitQNN Class.
 	"""
 	n_theta = 4
 	if qc_index:
