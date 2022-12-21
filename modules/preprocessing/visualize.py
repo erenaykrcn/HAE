@@ -33,7 +33,7 @@ def visualize_test_data(label, data_index):
     fig_x_test_2.savefig(os.path.join(dirname, relative_file_path))
 
 
-def visualize(data, loss_value, data_index, qc_index=0, custom_qc={}, output=False):
+def visualize(data, loss_value="test", data_index="test", qc_index=0, custom_qc={}, output=False):
     array_to_visualize = [[[],[],[]],
                           [[],[],[]],
                           [[],[],[]]]

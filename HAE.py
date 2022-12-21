@@ -59,8 +59,7 @@ class HAE(nn.Module):
 		min_loss = 1
 		best_params = self.state_dict()
 
-		data_set = sample_training_data(self.n_samples)[0]
-		data_set = Variable(torch.FloatTensor(data_set))
+		data_set = Variable(torch.FloatTensor(sample_training_data(self.n_samples)[0]))
 
 		loss_list = []  # Store loss history
 		self.train()
