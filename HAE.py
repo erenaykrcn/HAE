@@ -4,6 +4,7 @@ dirname = os.path.dirname(__file__)
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+from torch.utils.data import DataLoader
 import numpy as np
 
 from qiskit import Aer
@@ -11,11 +12,11 @@ from qiskit_machine_learning.connectors import TorchConnector
 
 from modules.qnn.qnn import create_qnn
 from modules.qnn.utils import convert_prob_to_exp_batch
-from modules.preprocessing.preprocessing import preprocess
+from modules.preprocessing.preprocessing import preprocess, sample_training_data
 
 
 class HAE(nn.Module):
-	def __init__(self, qc_index=0, custom_qc={}, epochs=100, batchSize=128, learningRate=1e-3, n_samples=200):
+	def __init__(self, qc_index=0, custom_qc={}, epochs=50, batchSize=32, learningRate=1e-3, n_samples=200):
 		super(HAE, self).__init__()
 		self.encoder = nn.Sequential(
 									nn.Linear(36, 18),
@@ -58,41 +59,27 @@ class HAE(nn.Module):
 		min_loss = 1
 		best_params = self.state_dict()
 
-		data_set = preprocess()[0][:self.n_samples]
+		data_set = sample_training_data(self.n_samples)[0]
+		data_set = Variable(torch.FloatTensor(data_set))
+
 		loss_list = []  # Store loss history
 		self.train()
 		print(f"Training Started. \n Data points in Data set: {len(data_set)} \n Epochs: {self.epochs}")
 
+		data_set = DataLoader(data_set, batch_size=self.batchSize, shuffle=True)
+
 		for epoch in range(self.epochs):
-			total_loss = [] 
-
-			data_set = Variable(torch.FloatTensor(data_set))
-			output = self(data_set)
-			loss = torch.sqrt(self.loss_func(output, data_set))
-			self.optimizer.zero_grad()
-			loss.backward()
-			self.optimizer.step()
-			loss_list.append(loss.item())
-			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, loss.item()))
-			average_loss = loss.item()
-
-			"""for data in data_set:
-				data = Variable(torch.FloatTensor(data))
-				
-				# Predict
-				output = self(data)
-				# Loss
-				loss = torch.sqrt(self.loss_func(output, data))
-
-				# Backpropagation
-				self.optimizer.zero_grad()
-				loss.backward()
-				self.optimizer.step()
+			total_loss = []
+			for i, data in enumerate(data_set):
+				self.optimizer.zero_grad(set_to_none=True)
+				output = self(data)  # Forward pass
+				loss = torch.sqrt(self.loss_func(output, data))  # Calculate loss
+				loss.backward()  # Backward pass
+				self.optimizer.step()  # Optimize weights
 				total_loss.append(loss.item())
-
 			average_loss = sum(total_loss) / len(total_loss)
 			loss_list.append(average_loss)
-			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, average_loss))"""
+			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, average_loss))
 
 			if min_loss > average_loss:
 				print("New min loss found!")

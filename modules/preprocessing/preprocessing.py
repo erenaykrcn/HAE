@@ -43,48 +43,32 @@ def preprocess():
         x_test.append(test_data)
         y_test.append(int(line_elements[-1]))
 
+    x_training = np.array(x_training)
+    y_training = np.array(y_training)
+
+    # First 3 classes are seen as abnormal data.
+    x_training = x_training[np.where(y_training>3)].tolist()
+    y_training = y_training[np.where(y_training>3)].tolist()
+
     return (x_training, y_training, x_test, y_test)
 
 
-def visualize_test_data(label, data_index):
+def sample_training_data(n_samples):
     x_training, y_training, x_test, y_test = preprocess()
+    sample_per_class = n_samples//3
 
-    y_test = np.array(y_test)
-    x_test = np.array(x_test)
-    x_test_2 =  x_test[np.where(y_test == label)][data_index]
+    x_training = np.array(x_training)
+    y_training = np.array(y_training)
 
-    array_to_visualize = [[[],[],[]],
-                          [[],[],[]],
-                          [[],[],[]]]
+    class4 = x_training[np.where(y_training==4)][:sample_per_class].tolist()
+    label4 = np.ones(sample_per_class) * 4
+    class5 = x_training[np.where(y_training==5)][:sample_per_class].tolist()
+    label5 = np.ones(sample_per_class) * 5
+    class7 = x_training[np.where(y_training==7)][:sample_per_class].tolist()
+    label7 = np.ones(sample_per_class) * 7
 
-    index = 0
-    for m in range(3):
-        for n in range(3):
-            for i in range(4):
-                array_to_visualize[m][n].append(x_test_2[index*4 + i])
-            index += 1
+    filtered_x = class4 + class5 + class7
+    filtered_y = label4.tolist() + label5.tolist() + label7.tolist()
 
-    fig_x_test_2 = plt.figure()
-    plt.imshow(array_to_visualize)
+    return (filtered_x, filtered_y)
 
-    relative_file_path = f"../../data/visualized_test_data/statlog/class_{label}_index_{data_index}.png"
-    fig_x_test_2.savefig(os.path.join(dirname, relative_file_path))
-
-
-def visualize(data, loss_value, data_index, qc_index=0, custom_qc={}, output=False):
-    array_to_visualize = [[[],[],[]],
-                          [[],[],[]],
-                          [[],[],[]]]
-
-    index = 0
-    for m in range(3):
-        for n in range(3):
-            for i in range(4):
-                array_to_visualize[m][n].append(data[index*4 + i])
-            index += 1
-
-    fig = plt.figure()
-    plt.imshow(array_to_visualize)
-
-    relative_file_path = f"../../data/visualize_constr_data/pqc{qc_index if qc_index else '_custom'}/loss_{loss_value}/{data_index}_{'reconstr' if output else 'original'}.png"
-    fig.savefig(os.path.join(dirname, relative_file_path))
