@@ -1,17 +1,18 @@
-#import os
-#dirname = os.path.dirname(__file__)
-#import sys
-#sys.path.append(os.path.join(dirname, './modules/qnn'))
 from modules.qnn.qcircuits.circuit_map import circuit_map
-from modules.qnn.utils import convert_prob_to_exp
+from modules.qnn.utils import convert_prob_to_exp, convert_prob_to_exp_batch
 
 from qiskit_machine_learning.neural_networks import SamplerQNN
 from qiskit_machine_learning.connectors import TorchConnector
 from qiskit.circuit import ParameterVector
+from qiskit.utils import QuantumInstance
+from qiskit import Aer
+from qiskit.quantum_info import SparsePauliOp
 
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+
+import numpy as np
 
 
 theta = ParameterVector('θ', 4)
@@ -21,28 +22,41 @@ loss_func = nn.MSELoss()
 
 
 def interpret(x):
-    return x
+    return x % 4
 
 
-qnn = TorchConnector(SamplerQNN(
+# TODO: Training too slow!
+qnn = SamplerQNN(
     circuit=qc,
     input_params=x,
     weight_params=theta,
-    interpret=interpret,
     input_gradients=True,
-    output_shape=16
-))
-optimizer = torch.optim.Adam(qnn.parameters(), lr=0.05, weight_decay=1e-5)
+    interpret=interpret,
+    output_shape=4,
+    #quantum_instance=QuantumInstance(
+    #    backend=Aer.get_backend("aer_simulator")
+    #)
+)
 
-data = [[0.5, 0.3, 0.4, 0.3], [0.6, 0.46, 0.12, 0.15]]
-input_data = Variable(torch.FloatTensor(data))
-x = qnn.forward(input_data=input_data)
 
-output_data = convert_prob_to_exp(x)
+#optimizer = torch.optim.Adam(qnn.parameters(), lr=0.05, weight_decay=1e-5)
 
-optimizer.zero_grad()
-loss = loss_func(output_data, input_data)
-loss.backward()
-optimizer.step()
+data_set = np.random.rand(600,4)
+input_data = Variable(torch.FloatTensor(data_set))
 
-print(loss.data)
+x = qnn.forward(input_data=data_set, weights=[0.1, 0.2, 0.12, 0.8])
+print(x)
+
+#output_data = convert_prob_to_exp_batch(x)
+
+
+#optimizer.zero_grad()
+#loss = loss_func(output_data, input_data)
+#loss.backward()
+
+#optimizer.step()
+
+#print(loss.data)
+
+back = qnn.backward(input_data=data_set, weights=[0.1, 0.2, 0.12, 0.8])
+print(back)

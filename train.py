@@ -1,6 +1,5 @@
-from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from HAE import HAE
 
 
-if __name__ == '__main__':
-    model = ClassicalAutoencoder()
-    model.train()
+hae = HAE(qc_index=3, n_samples=600, epochs=50)
+hae.trainHybrid()
