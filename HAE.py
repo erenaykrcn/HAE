@@ -46,7 +46,7 @@ class HAE(nn.Module):
 	def forward(self, x):
 		x = self.encoder(x)
 		x = self.qnn(x)
-		x = convert_prob_to_exp_batch(x)
+		#x = convert_prob_to_exp_batch(x)
 		x = self.decoder(x)
 		return x
 
