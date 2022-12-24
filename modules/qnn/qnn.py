@@ -1,6 +1,6 @@
 import numpy as np
 
-from qiskit_machine_learning.neural_networks import SamplerQNN
+from qiskit_machine_learning.neural_networks import CircuitQNN
 from qiskit.utils import QuantumInstance
 from qiskit.circuit import ParameterVector
 from qiskit.utils import QuantumInstance
@@ -37,13 +37,12 @@ def create_qnn(backend, shots, qc_index=0, custom_qc={}):
 		raise ValueError("Either a qc index or a custom qc has to be given!")
 
 	# Uses the ParamterShiftEstimatorGradient per default.
-	qnn = SamplerQNN(
+	qnn = CircuitQNN(
 		circuit=circuit,
 		input_params=x,
 		weight_params=theta,
 		input_gradients=True,
-		interpret=lambda x: x%4,
-		output_shape=4,
+		backend=backend
     )
 	
 	return qnn

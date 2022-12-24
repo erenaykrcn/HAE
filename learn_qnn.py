@@ -1,7 +1,7 @@
 from modules.qnn.qcircuits.circuit_map import circuit_map
 from modules.qnn.utils import convert_prob_to_exp, convert_prob_to_exp_batch
 
-from qiskit_machine_learning.neural_networks import SamplerQNN
+from qiskit_machine_learning.neural_networks import CircuitQNN
 from qiskit_machine_learning.connectors import TorchConnector
 from qiskit.circuit import ParameterVector
 from qiskit.utils import QuantumInstance
@@ -26,16 +26,14 @@ def interpret(x):
 
 
 # TODO: Training too slow!
-qnn = SamplerQNN(
+qnn = CircuitQNN(
     circuit=qc,
     input_params=x,
     weight_params=theta,
     input_gradients=True,
-    interpret=interpret,
-    output_shape=4,
-    #quantum_instance=QuantumInstance(
-    #    backend=Aer.get_backend("aer_simulator")
-    #)
+    quantum_instance=QuantumInstance(
+        backend=Aer.get_backend("aer_simulator")
+    )
 )
 
 
