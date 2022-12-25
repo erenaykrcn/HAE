@@ -16,7 +16,7 @@ from preprocessing import preprocess, sample_training_data
 
 
 class ClassicalAutoencoder(nn.Module):
-	def __init__(self, epochs=50, batchSize=32, learningRate=1e-3, n_samples=600):
+	def __init__(self, epochs=30, batchSize=32, learningRate=1e-3, n_samples=600):
 		super(ClassicalAutoencoder, self).__init__()
 		# Encoder Network
 		self.encoder = nn.Sequential(nn.Linear(36, 18),
@@ -46,6 +46,10 @@ class ClassicalAutoencoder(nn.Module):
 	def forward(self, x):
 		x = self.encoder(x)
 		x = self.decoder(x)
+		return x
+
+	def get_latent_space_state(self, x):
+		x = self.encoder(x)
 		return x
 
 	def trainClassical(self):

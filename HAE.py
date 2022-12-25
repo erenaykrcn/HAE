@@ -25,7 +25,7 @@ class HAE(nn.Module):
 									nn.Tanh(),
 									nn.Linear(9, 4),
 									nn.Tanh())
-		self.qnn = TorchConnector(create_qnn(Aer.get_backend('aer_simulator'), 250, qc_index, custom_qc))
+		self.qnn = TorchConnector(create_qnn(Aer.get_backend('aer_simulator'), qc_index, custom_qc))
 		self.decoder = nn.Sequential(
 									nn.Linear(4, 9),
 									nn.Tanh(),
@@ -51,23 +51,33 @@ class HAE(nn.Module):
 		return x
 
 
-	def trainHybrid(self):
+	def get_latent_space_state(self, x):
+		x = self.encoder(x)
+		x = self.qnn(x)
+		x = convert_prob_to_exp_batch(x)
+		return x
+
+
+	def trainReconstruction(self, epochs=None, n_samples=None):
 		"""
 			The model is trained based on a mean 
 			square root reconstruction loss.
 		"""
+		epochs = epochs if epochs else self.epochs
+		n_samples = n_samples if n_samples else self.n_samples
+
 		min_loss = 1
 		best_params = self.state_dict()
 
-		data_set = Variable(torch.FloatTensor(sample_training_data(self.n_samples)[0]))
+		data_set = Variable(torch.FloatTensor(sample_training_data(n_samples)[0]))
 
 		loss_list = []  # Store loss history
 		self.train()
-		print(f"Training Started. \n Data points in Data set: {len(data_set)} \n Epochs: {self.epochs}")
+		print(f"Training Started. \n Data points in Data set: {len(data_set)} \n Epochs: {epochs}")
 
 		data_set = DataLoader(data_set, batch_size=self.batchSize, shuffle=True)
 
-		for epoch in range(self.epochs):
+		for epoch in range(epochs):
 			total_loss = []
 			for i, data in enumerate(data_set):
 				self.optimizer.zero_grad(set_to_none=True)
@@ -78,7 +88,7 @@ class HAE(nn.Module):
 				total_loss.append(loss.item())
 			average_loss = sum(total_loss) / len(total_loss)
 			loss_list.append(average_loss)
-			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, self.epochs, average_loss))
+			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, average_loss))
 
 			if min_loss > average_loss:
 				print("New min loss found!")

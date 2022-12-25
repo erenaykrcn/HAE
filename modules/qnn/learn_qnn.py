@@ -15,9 +15,9 @@ from torch.autograd import Variable
 import numpy as np
 
 
-theta = ParameterVector('θ', 4)
+theta = ParameterVector('θ', 8)
 x = ParameterVector('x', 4)
-qc = circuit_map[2](x=x, theta=theta)
+qc = circuit_map[5](x=x, theta=theta)
 loss_func = nn.MSELoss()
 
 
@@ -39,11 +39,12 @@ qnn = CircuitQNN(
 
 #optimizer = torch.optim.Adam(qnn.parameters(), lr=0.05, weight_decay=1e-5)
 
-data_set = np.random.rand(600,4)
+data_set = np.random.rand(50,4)
 input_data = Variable(torch.FloatTensor(data_set))
 
-x = qnn.forward(input_data=data_set, weights=[0.1, 0.2, 0.12, 0.8])
-print(x)
+x = TorchConnector(qnn).forward(input_data=input_data)
+output_data = convert_prob_to_exp_batch(x)
+print(output_data)
 
 #output_data = convert_prob_to_exp_batch(x)
 
@@ -55,6 +56,3 @@ print(x)
 #optimizer.step()
 
 #print(loss.data)
-
-back = qnn.backward(input_data=data_set, weights=[0.1, 0.2, 0.12, 0.8])
-print(back)

@@ -1,0 +1,98 @@
+Training Started.
+ Data points in Data set: 600
+ Epochs: 50
+epoch [1/50], loss:0.2347
+New min loss found!
+epoch [2/50], loss:0.1379
+New min loss found!
+epoch [3/50], loss:0.0656
+New min loss found!
+epoch [4/50], loss:0.0503
+New min loss found!
+epoch [5/50], loss:0.0494
+New min loss found!
+epoch [6/50], loss:0.0488
+New min loss found!
+epoch [7/50], loss:0.0486
+New min loss found!
+epoch [8/50], loss:0.0484
+New min loss found!
+epoch [9/50], loss:0.0482
+New min loss found!
+epoch [10/50], loss:0.0476
+New min loss found!
+epoch [11/50], loss:0.0467
+New min loss found!
+epoch [12/50], loss:0.0456
+New min loss found!
+epoch [13/50], loss:0.0436
+New min loss found!
+epoch [14/50], loss:0.0409
+New min loss found!
+epoch [15/50], loss:0.0380
+New min loss found!
+epoch [16/50], loss:0.0351
+New min loss found!
+epoch [17/50], loss:0.0332
+New min loss found!
+epoch [18/50], loss:0.0321
+New min loss found!
+epoch [19/50], loss:0.0308
+New min loss found!
+epoch [20/50], loss:0.0300
+New min loss found!
+epoch [21/50], loss:0.0292
+New min loss found!
+epoch [22/50], loss:0.0286
+New min loss found!
+epoch [23/50], loss:0.0283
+New min loss found!
+epoch [24/50], loss:0.0279
+New min loss found!
+epoch [25/50], loss:0.0277
+New min loss found!
+epoch [26/50], loss:0.0277
+epoch [27/50], loss:0.0275
+New min loss found!
+epoch [28/50], loss:0.0274
+New min loss found!
+epoch [29/50], loss:0.0272
+New min loss found!
+epoch [30/50], loss:0.0274
+epoch [31/50], loss:0.0272
+New min loss found!
+epoch [32/50], loss:0.0270
+New min loss found!
+epoch [33/50], loss:0.0269
+New min loss found!
+epoch [34/50], loss:0.0269
+New min loss found!
+epoch [35/50], loss:0.0271
+epoch [36/50], loss:0.0268
+New min loss found!
+epoch [37/50], loss:0.0267
+New min loss found!
+epoch [38/50], loss:0.0268
+epoch [39/50], loss:0.0267
+epoch [40/50], loss:0.0265
+New min loss found!
+epoch [41/50], loss:0.0262
+New min loss found!
+epoch [42/50], loss:0.0262
+New min loss found!
+epoch [43/50], loss:0.0261
+New min loss found!
+epoch [44/50], loss:0.0259
+New min loss found!
+epoch [45/50], loss:0.0257
+New min loss found!
+epoch [46/50], loss:0.0254
+New min loss found!
+epoch [47/50], loss:0.0251
+New min loss found!
+epoch [48/50], loss:0.0250
+New min loss found!
+epoch [49/50], loss:0.0247
+New min loss found!
+epoch [50/50], loss:0.0242
+New min loss found!

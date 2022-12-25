@@ -11,12 +11,14 @@ from modules.preprocessing.preprocessing import preprocess
 from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
 
 
-qc_index = 1
-loss_value = 0.048
-loss_value_classical = 0.023
-n_samples = 20
+qc_index = 5
+loss_value = 0.027
 
-offset=900
+
+loss_value_classical = 0.023
+n_samples = 20		
+
+offset=0
 index=1
 
 

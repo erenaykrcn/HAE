@@ -13,7 +13,7 @@ sys.path.append(os.path.join(dirname, './qcircuits'))
 from circuit_map import circuit_map, N_PARAMS
 
 
-def create_qnn(backend, shots, qc_index=0, custom_qc={}):
+def create_qnn(backend, qc_index=0, custom_qc={}):
 	"""
 		Given the qc_index or custom_qc params,
 		it delivers a Quantum Neural Network from
@@ -42,7 +42,7 @@ def create_qnn(backend, shots, qc_index=0, custom_qc={}):
 		input_params=x,
 		weight_params=theta,
 		input_gradients=True,
-		backend=backend
+		quantum_instance=backend
     )
 	
 	return qnn
