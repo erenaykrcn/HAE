@@ -8,7 +8,7 @@ from sklearn.ensemble import IsolationForest
 
 import sys
 sys.path.append(os.path.join(dirname, '../../'))
-from HAE import HAE
+from modules.HAE.HAE import HAE
 from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
 from modules.preprocessing.preprocessing import preprocess, sample_training_data
 

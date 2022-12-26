@@ -10,6 +10,8 @@ import numpy as np
 from qiskit import Aer
 from qiskit_machine_learning.connectors import TorchConnector
 
+import sys
+sys.path.append(os.path.join(dirname, '../../'))
 from modules.qnn.qnn import create_qnn
 from modules.qnn.utils import convert_prob_to_exp_batch
 from modules.preprocessing.preprocessing import preprocess, sample_training_data
@@ -97,8 +99,8 @@ class HAE(nn.Module):
 
 		path = ''
 		if self.qc_index:
-			path = f'./data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt'
+			path = f'../../data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt'
 		elif self.custom_qc:
-			path = f'./data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
+			path = f'../../data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
 
 		torch.save(best_params, os.path.join(dirname, path))

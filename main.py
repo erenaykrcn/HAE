@@ -5,10 +5,10 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from HAE import HAE
 from modules.preprocessing.visualize import visualize, visualize_test_data
 from modules.preprocessing.preprocessing import preprocess
 from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from modules.HAE.HAE import HAE
 
 
 qc_index = 5
