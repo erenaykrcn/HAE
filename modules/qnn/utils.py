@@ -2,6 +2,7 @@ import torch
 from torch.autograd import Variable
 from qiskit.circuit import ParameterVector
 from qiskit import transpile, assemble
+from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 import numpy as np
 
 import os
@@ -45,13 +46,21 @@ class PQC:
 	with the quantum circuit 
 	"""
 	def __init__(self, backend, shots, qc_index):
-		n_theta = N_PARAMS[qc_index]
-		self.x_latent = ParameterVector('x', 4)
-		self.theta = ParameterVector('θ', n_theta)
+		if qc_index != 9:
+			n_theta = N_PARAMS[qc_index]
+			self.x = ParameterVector('x', 4)
+			self.theta = ParameterVector('θ', n_theta)
 
-		self._circuit = circuit_map[qc_index](x=self.x_latent, theta=self.theta)
+			self._circuit = circuit_map[qc_index](x=self.x, theta=self.theta)
+		else:
+			encoder = ZZFeatureMap(feature_dimension=4, reps=2)
+			ansatz = TwoLocal(4, ['ry', 'rz'], 'cz', reps=1)
+			AD_HOC_CIRCUIT = encoder.compose(ansatz)
+			self.x = encoder.ordered_parameters
+			self.theta = ansatz.ordered_parameters
+			self._circuit = AD_HOC_CIRCUIT
+
 		self._circuit.measure_all()
-		
 		self.backend = backend
 		self.shots = shots
 	
@@ -59,7 +68,7 @@ class PQC:
 	def run(self, x, theta):
 		t_qc = transpile(self._circuit,
 						 self.backend)
-		params = [{self.theta: theta, self.x_latent:x}]
+		params = [{self.theta: theta, self.x: x}]
 		qobj = assemble(t_qc, shots=self.shots, parameter_binds = params)
 		job = self.backend.run(qobj)
 
@@ -69,10 +78,18 @@ class PQC:
 		for key in result.keys():
 			index = int(key, 2) 
 			counts[index] = result[key]
-		print(counts)
 
 		# Compute probabilities for each state
 		probabilities = counts / self.shots
 
-		expectations = convert_prob_to_exp(Variable(torch.FloatTensor(probabilities))).cpu().detach()
+		expectations = convert_prob_to_exp(Variable(torch.FloatTensor(probabilities))).tolist()
 		return expectations
+
+
+	def assign_parameters(self, x, theta):
+		parameters = {}
+		for i, p in enumerate(self.x):
+			parameters[p] = x[i]
+		for i, p in enumerate(self.theta):
+			parameters[p] = theta[i]
+		return self._circuit.assign_parameters(parameters)

@@ -1,68 +1,97 @@
+import os
+dirname = os.path.dirname(__file__)
+
 import torch
 import torch.nn as nn
-from torch.autograd import Function
-from qiskit.circuit import ParameterVector
-
+from torch.autograd import Function, Variable
+import numpy as np
 from sklearn.ensemble import IsolationForest
+
+from qiskit.circuit import ParameterVector
 
 import sys
 sys.path.append(os.path.join(dirname, '../../'))
 from modules.qnn.qcircuits.circuit_map import circuit_map, N_PARAMS
 from modules.qnn.utils import PQC
+from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from modules.preprocessing.preprocessing import sample_training_data
 
 
 class Hybrid(nn.Module):
-	def __init__(self, backend, shots, shift, qc_index, isolation_forest_model):
+	def __init__(self, backend, shots, shift, qc_index, if_model=None, fit_data=None):
 		super(Hybrid, self).__init__()
 		self.quantum_circuit = PQC(backend, shots, qc_index)
 		n_theta = N_PARAMS[qc_index]
 		self.theta = nn.Parameter((torch.rand(n_theta) * 2 * np.pi) - np.pi)
 		self.shift = shift
-		self.isolation_forest_model = isolation_forest_model
+		self.if_model = if_model
+		self.fit_data = fit_data
 
 	def forward(self, x):
-		return HybridFunction.apply(x, self.theta, self.quantum_circuit, self.shift, self.isolation_forest_model)
+		return HybridFunction.apply(x, self.theta, self.quantum_circuit, self.shift, self.if_model, self.fit_data)
 
 
 class HybridFunction(Function):
-    """ Hybrid quantum - classical function definition """
-	
+	""" Hybrid quantum - classical function definition """
+
 	@staticmethod
-	def forward(self, x, theta, quantum_circuit, shift):
-		""" Forward pass computation """
-		self.shift = shift
-		self.quantum_circuit = quantum_circuit
-		self.theta = theta
+	def forward(ctx, x, theta, quantum_circuit, shift, if_model, fit_data):
+		""" 
+			Forward pass computation.
+			If the IsolationForest Model is given during initialization 
+			of Hybrid Module, it uses the pre-fitted IsolationForest Model.
+			If not given, cretes a new IsolationForest Model and fit the exp values
+			after PQC processing to get the anomaly scores. 
+		"""
+		ctx.shift = shift
+		ctx.quantum_circuit = quantum_circuit
 
-		input_list = x.cpu().detach()
-		exp_values = []
-		for input_value in input_list:
-			exp = self.quantum_circuit.run(input_value, theta.cpu().detach())
-			exp_values.append(exp)
-		if_model = IsolationForest().fit(exp_values)
-		self.if_model = if_model
+		exp = ctx.quantum_circuit.run(x.tolist(), theta.tolist())
 
-		result = if_model.decision_function(exp_values)
+		if if_model:
+			ctx.if_model = if_model
+		elif fit_data != None:
+			fit_data_exp = []
+			for data in fit_data:
+				fit_data_exp.append(ctx.quantum_circuit.run(data, theta.tolist()))
+			ctx.if_model = IsolationForest().fit(fit_data_exp)
+		else:
+			raise ValueError("Either an IsolationForest model or fit data to be used has to be provided")
+
+		result = ctx.if_model.decision_function([exp])
 		result = Variable(torch.FloatTensor(result))
 
-		self.save_for_backward(x, result)
+		ctx.save_for_backward(x, theta)
 		return result
 
 	@staticmethod
-	def backward(self, grad_output):
-		""" Backward pass computation """
-		x, expectation_z = self.saved_tensors
-		input_list = np.array(x.cpu().detach())
+	def backward(ctx, grad_output):
+		"""
+			Backward pass computation.
+			For the computation of anomaly scores, it uses
+			the IsolationForest Model that was saved during the
+			forward pass.
+		"""
+		x, theta = ctx.saved_tensors
+		theta = theta.tolist()
+		input_list = x.tolist()
 
-		shift_right = input_list + np.ones(input_list.shape) * self.shift
-		shift_left = input_list - np.ones(input_list.shape) * self.shift
+		theta_gradients = []
+		for i in range(len(theta)):
+			theta_right = theta.copy()
+			theta_left = theta.copy()
 
-		gradients = []
-		for i in range(len(input_list)):
-			expectation_right = self.if_model.decision_function(self.quantum_circuit.run(shift_right[i], self.theta.cpu().detach()))
-			expectation_left  = self.if_model.decision_function(self.quantum_circuit.run(shift_left[i], self.theta.cpu().detach()))
+			theta_right[i] = theta[i] + ctx.shift
+			theta_left[i] = theta[i] - ctx.shift
 
-			gradient = torch.tensor([expectation_right]) - torch.tensor([expectation_left])
-			gradients.append(gradient)
-		gradients = np.array([gradients]).T
-		return torch.tensor([gradients]).float() * grad_output.float()
+			exp_right = ctx.quantum_circuit.run(x=input_list, theta=theta_right)
+			exp_left = ctx.quantum_circuit.run(x=input_list, theta=theta_left)
+
+			anomaly_right = ctx.if_model.decision_function([exp_right])[0]
+			anomaly_left  = ctx.if_model.decision_function([exp_left])[0]
+
+			#gradient = (anomaly_right - anomaly_left) / (2 * ctx.shift)
+			gradient = (anomaly_right - anomaly_left) / 2
+			theta_gradients.append(gradient)
+
+		return None, torch.tensor(theta_gradients).float() * grad_output.float(), None, None, None, None, None

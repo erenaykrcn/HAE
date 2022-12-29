@@ -82,7 +82,7 @@ class HAE(nn.Module):
 		for epoch in range(epochs):
 			total_loss = []
 			for i, data in enumerate(data_set):
-				self.optimizer.zero_grad(set_to_none=True)
+				self.optimizer.zero_grad()
 				output = self(data)  # Forward pass
 				loss = torch.sqrt(self.loss_func(output, data))  # Calculate loss
 				loss.backward()  # Backward pass

@@ -6,28 +6,44 @@ def get_scores(predict, labels):
 	labels = np.array(labels)
 
 	num_anomalies_labeled_by_model = len(predict[np.where(predict==-1)])
-	num_anomalies = len(labels[np.where(labels<4)])
+	num_anomalies = len(labels[np.where(labels==-1)])
 
-	labels[np.where(labels<4)] = np.ones(num_anomalies) * (-1)
-	correctly_discovered_anomalies = np.where(labels == predict, -1, 0)
-	num_correctly_discovered_anomalies = len(correctly_discovered_anomalies[np.where(correctly_discovered_anomalies==-1)])
+	predict = np.where(predict==-1, -1, 0)
+	num_correctly_discovered_anomalies = np.sum(np.where(labels == predict, 1, 0))
 
 	precision = num_correctly_discovered_anomalies / num_anomalies_labeled_by_model
 	recall = num_correctly_discovered_anomalies / num_anomalies
 	f1 = stats.hmean([precision, recall])
 
+	"""print(predict)
+	print(labels)
+
+	print(f"num_anomalies {num_anomalies}")	
+	print(f"num_anomalies_labeled_by_model {num_anomalies_labeled_by_model}")
+	print(f"num_correctly_discovered_anomalies {num_correctly_discovered_anomalies}")"""
+
 	return (f1, precision, recall)
 
 
 # TODO: Delete this part after testing is over
-from predict import predict_HAE, predict_classical
+from predict import predict_HAE, predict_classical, predict_ADL, predict_QVC
 
-predict, labels = predict_HAE(qc_index = 8, loss_value = 0.039, n_samples=600, offset=100)
+predict, labels = predict_HAE(qc_index = 2, loss_value = 0.022, n_samples=100)
 f1, precision, recall = get_scores(predict, labels)
 
 print(f"HYBRID: f1: {f1}; precision: {precision}; recall: {recall}")
 
-predict, labels = predict_classical(n_samples=400, offset=0)
+predict, labels = predict_classical(n_samples=100)
 f1, precision, recall = get_scores(predict, labels)
 
 print(f"CLASSICAL: f1: {f1}; precision: {precision}; recall: {recall}")
+
+#predict, labels = predict_ADL(qc_index = 4, loss_value = 0.193, n_samples=100)
+#f1, precision, recall = get_scores(predict, labels)
+
+#print(f"AD_LOSS: f1: {f1}; precision: {precision}; recall: {recall}")
+
+predict, labels = predict_QVC(qc_index = 9, loss_value = 0.362, n_samples=50, is_binary=True)
+f1, precision, recall = get_scores(predict, labels)
+
+print(f"QVC_LOSS: f1: {f1}; precision: {precision}; recall: {recall}")
