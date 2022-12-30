@@ -22,8 +22,8 @@ def predict_HAE(qc_index = 2, loss_value = 0.022, n_samples = 100):
 	hae.load_state_dict(torch.load(os.path.join(dirname, path)))
 	hae.eval()
 
-	test_data = Variable(torch.FloatTensor(sample_test_data(n_samples)[0]))
-	test_labels = sample_test_data(n_samples)[1]
+	test_data, test_labels = sample_test_data(n_samples, True)
+	test_data = Variable(torch.FloatTensor(test_data))
 
 	train_data = Variable(torch.FloatTensor(sample_training_data(1000)[0]))
 
@@ -42,8 +42,8 @@ def predict_classical(n_samples = 100):
 	cae.load_state_dict(torch.load(os.path.join(dirname, path)))
 	cae.eval()
 
-	test_data = Variable(torch.FloatTensor(sample_test_data(n_samples)[0]))
-	test_labels = sample_test_data(n_samples)[1]
+	test_data, test_labels = sample_test_data(n_samples, True)
+	test_data = Variable(torch.FloatTensor(test_data))
 	train_data = Variable(torch.FloatTensor(sample_training_data(1000)[0]))
 
 	test_data_latent = cae.get_latent_space_state(test_data)
@@ -61,8 +61,8 @@ def predict_ADL(qc_index = 2, loss_value = 1.003, n_samples = 100):
 	adl_ae.hybrid.load_state_dict(torch.load(os.path.join(dirname, path)))
 	adl_ae.hybrid.eval()
 
-	test_data = Variable(torch.FloatTensor(sample_test_data(n_samples)[0]))
-	test_labels = sample_test_data(n_samples)[1]
+	test_data, test_labels = sample_test_data(n_samples, True)
+	test_data = Variable(torch.FloatTensor(test_data))
 
 	predict = []
 	for data in test_data:
@@ -81,16 +81,10 @@ def predict_QVC(qc_index = 9, loss_value = 1.194, n_samples = 100, is_binary=Fal
 	with open(os.path.join(dirname, path), 'r') as f:
 		[theta.append(float(line)) for line in f.readlines()]
 
-	test_data = Variable(torch.FloatTensor(sample_test_data(n_samples)[0]))
-	test_labels = sample_test_data(n_samples)[1]
-
-	#test_data = Variable(torch.FloatTensor(sample_vqc_training_data(n_samples)[0]))
-	#test_labels = np.array(sample_vqc_training_data(n_samples)[1])
-	#test_labels = np.where(test_labels>3, 1, -1)
+	test_data, test_labels = sample_test_data(n_samples, True)
+	test_data = Variable(torch.FloatTensor(test_data))
 
 	qvc = QVCAutoencoder(qc_index=qc_index)
 	predict = qvc.eval(theta, test_data, is_binary)
-
-	print(f"predict: {predict}")
 
 	return (predict, test_labels)

@@ -1,11 +1,20 @@
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA
 
 dirname = os.path.dirname(__file__)
 import sys
 sys.path.append(os.path.join(dirname, './'))
 from preprocessing import preprocess, sample_training_data
+
+import torch
+from torch.autograd import Variable
+
+import sys
+sys.path.append(os.path.join(dirname, '..\\..\\'))
+from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from modules.preprocessing.preprocessing import sample_test_data
 
 
 def visualize_test_data(label, data_index):
@@ -50,3 +59,47 @@ def visualize(data, loss_value="test", data_index="test", qc_index=0, custom_qc=
 
     relative_file_path = f"../../data/visualize_constr_data/pqc{qc_index if qc_index else '_custom'}/loss_{loss_value}/{data_index}_{'reconstr' if output else 'original'}.png"
     fig.savefig(os.path.join(dirname, relative_file_path))
+
+
+def project_to_2D(x):
+    pca = PCA(n_components=2)
+    principalComponents = pca.fit_transform(x)
+    return principalComponents
+
+
+def plot_PCA_2D(n_samples):
+    path = f'../../data/training_results/classical/training_result_loss_0.022.pt'
+    cae = ClassicalAutoencoder()
+    cae.load_state_dict(torch.load(os.path.join(dirname, path)))
+    cae.eval()
+
+    test_data, test_labels = sample_test_data(n_samples, True)
+    test_data_latent = cae.get_latent_space_state(Variable(torch.FloatTensor(test_data))).tolist()
+    test_data = project_to_2D(test_data_latent)
+
+    x_values = []
+    y_values = []
+    for i, data in enumerate(test_data):
+        x_values.append(data[0])
+        y_values.append(data[1])
+    x_values = np.array(x_values)
+    y_values = np.array(y_values)
+    test_labels = np.array(test_labels)
+
+    fig = plt.figure(figsize = (8,8))
+    ax = fig.add_subplot(1,1,1) 
+    ax.set_xlabel('Principal Component 1', fontsize = 15)
+    ax.set_ylabel('Principal Component 2', fontsize = 15)
+    ax.set_title('2 component PCA of Test Data', fontsize = 20)
+
+    anomalies = ax.scatter(x_values[np.where(test_labels==-1.0)]
+                   , y_values[np.where(test_labels==-1.0)]
+                   , c = 'r'
+                   , s = 50)
+    normal = ax.scatter(x_values[np.where(test_labels==1.0)]
+                   , y_values[np.where(test_labels==1.0)]
+                   , c = 'g'
+                   , s = 50)
+    ax.legend((anomalies, normal), ('Anomaly', 'Normal Data'))
+    ax.grid()
+    fig.savefig(f"2D-plot-n_samples-{n_samples}.png")

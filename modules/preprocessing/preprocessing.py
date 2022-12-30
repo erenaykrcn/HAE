@@ -7,7 +7,7 @@ import os
 dirname = os.path.dirname(__file__)
 
 import numpy as np
-
+import random
 
 
 def preprocess():
@@ -72,16 +72,21 @@ def sample_training_data(n_samples):
     return (filtered_x, filtered_y)
 
 
-def sample_test_data(n_samples, offset=0):
+def sample_test_data(n_samples, shuffle=False):
     x_training, y_training, x_test, y_test = preprocess()
+
+    if shuffle:
+        c = list(zip(x_test, y_test))
+        random.shuffle(c)
+        x_test, y_test = zip(*c)
 
     x_test = np.array(x_test)
     y_test = np.array(y_test)
 
-    class_normal = x_test[np.where(y_test>3)][offset:offset+int(n_samples*0.7)].tolist()
+    class_normal = x_test[np.where(y_test>3)][:int(n_samples*0.7)].tolist()
     label_normal = np.ones(int(n_samples*0.7))
 
-    class_abnormal = x_test[np.where(y_test<4)][offset:offset+int(n_samples*0.3)].tolist()
+    class_abnormal = x_test[np.where(y_test<4)][:int(n_samples*0.3)].tolist()
     label_abnormal = np.ones(int(n_samples*0.3)) * (-1)
 
     filtered_x = class_normal + class_abnormal
@@ -90,28 +95,33 @@ def sample_test_data(n_samples, offset=0):
     return (filtered_x, filtered_y)
 
 
-def sample_vqc_training_data(n_samples, offset=0):
+def sample_vqc_training_data(n_samples, shuffle=False):
     x_training, y_training, x_test, y_test = preprocess()
     sample_per_class = n_samples//6
 
-    x_training = np.array(x_test)
+    x_test = np.array(x_test)
     y_test = np.array(y_test)
 
-    class1 = x_training[np.where(y_test==1)][:sample_per_class].tolist()
+    class1 = x_test[np.where(y_test==1)][:sample_per_class].tolist()
     label1 = np.ones(sample_per_class) * 1
-    class2 = x_training[np.where(y_test==2)][:sample_per_class].tolist()
+    class2 = x_test[np.where(y_test==2)][:sample_per_class].tolist()
     label2 = np.ones(sample_per_class) * 2
-    class3 = x_training[np.where(y_test==3)][:sample_per_class].tolist()
+    class3 = x_test[np.where(y_test==3)][:sample_per_class].tolist()
     label3 = np.ones(sample_per_class) * 3
-    class4 = x_training[np.where(y_test==4)][:sample_per_class].tolist()
+    class4 = x_test[np.where(y_test==4)][:sample_per_class].tolist()
     label4 = np.ones(sample_per_class) * 4
-    class5 = x_training[np.where(y_test==5)][:sample_per_class].tolist()
+    class5 = x_test[np.where(y_test==5)][:sample_per_class].tolist()
     label5 = np.ones(sample_per_class) * 5
-    class7 = x_training[np.where(y_test==7)][:sample_per_class].tolist()
+    class7 = x_test[np.where(y_test==7)][:sample_per_class].tolist()
     label7 = np.ones(sample_per_class) * 7
 
     filtered_x = class1 + class2 + class3 + class4 + class5 + class7
     filtered_y = label1.tolist() + label2.tolist() + label3.tolist() + label4.tolist() + label5.tolist() + label7.tolist()
+
+    if shuffle:
+        c = list(zip(filtered_x, filtered_y))
+        random.shuffle(c)
+        filtered_x, filtered_y = zip(*c)
 
     return (filtered_x, filtered_y)
 

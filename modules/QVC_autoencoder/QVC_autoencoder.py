@@ -34,7 +34,7 @@ class QVCAutoencoder:
 
 	def loss_function_multiclass(self, theta):
 		cost = 0
-		x, labels = sample_vqc_training_data(self.n_samples)
+		x, labels = sample_vqc_training_data(self.n_samples, True)
 		x = self.cae.get_latent_space_state(Variable(torch.FloatTensor(x))).tolist()
 
 		classifications = get_classification_probabilities(x,theta, self.qc_index)
@@ -47,7 +47,7 @@ class QVCAutoencoder:
 
 	def loss_function_binary(self, theta):
 		cost = 0
-		x, labels = sample_vqc_training_data(self.n_samples)
+		x, labels = sample_vqc_training_data(self.n_samples, True)
 		labels = np.array(labels)
 		labels = np.where(labels>3, 1, 0)
 		x = self.cae.get_latent_space_state(Variable(torch.FloatTensor(x))).tolist()

@@ -13,14 +13,14 @@ qc_index = 9
 is_binary = True
 ip = np.random.random(N_PARAMS[qc_index])
 
-model = QVCAutoencoder(qc_index=qc_index)
+model = QVCAutoencoder(qc_index=qc_index, max_iter=100, n_samples=150)
 opt_theta, min_cost = model.train(ip, is_binary)
 
 
 if is_binary:
-	path = f"../../data/training_results_QVC/{'zzfeaturemap_twolocal' if qc_index == 9 else 'pqc' + str(qc_index)}/binary_cl/loss_{round(min_cost, 3)}.txt"
+	path = f"../../data/training_results_QVC/{'zzfeaturemap_twolocal' if qc_index == 9 else 'pqc' + str(qc_index)}/binary_cl/loss_{round(min_cost, 5)}.txt"
 else:
-	path = f"../../data/training_results_QVC/{'zzfeaturemap_twolocal' if qc_index == 9 else 'pqc' + str(qc_index)}/loss_{round(min_cost, 3)}.txt"
+	path = f"../../data/training_results_QVC/{'zzfeaturemap_twolocal' if qc_index == 9 else 'pqc' + str(qc_index)}/loss_{round(min_cost, 5)}.txt"
 f = open(os.path.join(dirname, path), 'w+')
 for theta in opt_theta:
 	f.write(str(theta)+"\n")
