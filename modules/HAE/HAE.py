@@ -16,6 +16,9 @@ from modules.qnn.qnn import create_qnn
 from modules.qnn.utils import convert_prob_to_exp_batch
 from modules.preprocessing.preprocessing import preprocess, sample_training_data
 
+sys.path.append(os.path.join(dirname, '../../HAE_demonstrator/'))
+from train.models import TrainJob
+
 
 class HAE(nn.Module):
 	def __init__(self, qc_index=0, custom_qc={}, epochs=50, batchSize=32, learningRate=1e-3, n_samples=200):
@@ -60,7 +63,7 @@ class HAE(nn.Module):
 		return x
 
 
-	def trainReconstruction(self, epochs=None, n_samples=None):
+	def trainReconstruction(self, job=None, epochs=None, n_samples=None):
 		"""
 			The model is trained based on a mean 
 			square root reconstruction loss.
@@ -79,6 +82,10 @@ class HAE(nn.Module):
 
 		data_set = DataLoader(data_set, batch_size=self.batchSize, shuffle=True)
 
+		train_job = None
+		if job:
+			train_job = TrainJob.objects.get(id=job["id"]) 
+
 		for epoch in range(epochs):
 			total_loss = []
 			for i, data in enumerate(data_set):
@@ -92,6 +99,12 @@ class HAE(nn.Module):
 			loss_list.append(average_loss)
 			print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, average_loss))
 
+			if train_job:
+				loss_string = train_job.loss_string if train_job.loss_string else ""
+				loss_string += str(round(average_loss, 3)) + ";"
+				train_job.loss_string = loss_string
+				train_job.save()
+
 			if min_loss > average_loss:
 				print("New min loss found!")
 				best_params = self.state_dict()
@@ -104,3 +117,4 @@ class HAE(nn.Module):
 			path = f'../../data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
 
 		torch.save(best_params, os.path.join(dirname, path))
+		return os.path.join(dirname, path)

@@ -60,7 +60,7 @@ class QVCAutoencoder:
 		return cost
 
 
-	def train(self, initial_point, is_binary=False):
+	def train(self, initial_point, job=None, sis_binary=False):
 		if is_binary:
 			loss_func = self.loss_function_binary
 		else:
@@ -70,6 +70,7 @@ class QVCAutoencoder:
 		opt_theta = result.x
 		min_cost = result.fun
 
+		# TODO: use job and save opt-theta, return data path
 		print(f"optimal theta values: {opt_theta}; min_cost: {min_cost}")
 		return opt_theta, min_cost
 
