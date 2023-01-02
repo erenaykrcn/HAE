@@ -16,7 +16,7 @@ from modules.qnn.qnn import create_qnn
 from modules.qnn.utils import convert_prob_to_exp_batch
 from modules.preprocessing.preprocessing import preprocess, sample_training_data
 
-sys.path.append(os.path.join(dirname, '../../HAE_demonstrator/'))
+sys.path.append(os.path.join(dirname, '../../../HAE_demonstrator'))
 from train.models import TrainJob
 
 
@@ -117,4 +117,9 @@ class HAE(nn.Module):
 			path = f'../../data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
 
 		torch.save(best_params, os.path.join(dirname, path))
+
+		if train_job:
+			train_job.status = "completed"
+			train_job.save()
+
 		return os.path.join(dirname, path)

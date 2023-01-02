@@ -5,6 +5,7 @@ from qiskit.utils import QuantumInstance
 from qiskit.circuit import ParameterVector
 from qiskit.utils import QuantumInstance
 from qiskit import Aer
+from qiskit.circuit.library import ZZFeatureMap, TwoLocal
 
 import os
 dirname = os.path.dirname(__file__)
@@ -31,8 +32,15 @@ def create_qnn(backend, qc_index=0, custom_qc={}):
 	if custom_qc:
 		# TODO: Placeholder QC
 		circuit = QuantumCircuit(n_qubits)
-	elif qc_index:
+	elif qc_index != 9:
 		circuit = circuit_map[qc_index](x=x, theta=theta)
+	elif qc_index == 9:
+		encoder = ZZFeatureMap(feature_dimension=4, reps=2)
+		ansatz = TwoLocal(4, ['ry', 'rz'], 'cz', reps=1)
+		AD_HOC_CIRCUIT = encoder.compose(ansatz)
+		x = encoder.ordered_parameters
+		theta = ansatz.ordered_parameters
+		circuit = AD_HOC_CIRCUIT
 	else:
 		raise ValueError("Either a qc index or a custom qc has to be given!")
 

@@ -1,0 +1,11 @@
+MW-Measure of PQC1: (1+5.35e-19j)
+MW-Measure of PQC2: (4.6407e-17+1.211e-18j)
+MW-Measure of PQC3: (0.8226-1.3637e-18j)
+MW-Measure of PQC4: (2.531e-17+2.404e-18j)
+MW-Measure of PQC5: (0.578+3.019e-18j)
+MW-Measure of PQC6: (2.965e-15+4.187e-19j)
+MW-Measure of PQC7: (0.764+1.131e-18j)
+MW-Measure of PQC8: (1.126e-16-6.589e-19j)
+MW-Measure of PQC9: (0.81-2.755e-19j)
+
+
