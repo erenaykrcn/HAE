@@ -15,7 +15,7 @@ from modules.QVC_autoencoder.utils import OptimizerLog, get_classification_proba
 
 
 class QVCAutoencoder:
-	def __init__(self, qc_index, max_iter=100, loss_value_classical=0.023, n_samples=150):
+	def __init__(self, qc_index, job=None, max_iter=100, loss_value_classical=0.023, n_samples=150):
 		path_cl = f'../../data/training_results/classical/training_result_loss_{loss_value_classical}.pt'
 		self.cae = ClassicalAutoencoder()
 		self.cae.load_state_dict(torch.load(os.path.join(dirname, path_cl)))
@@ -27,7 +27,8 @@ class QVCAutoencoder:
 
 		self.max_iter = max_iter
 		self.n_samples = n_samples
-		self.log = OptimizerLog()
+		self.job = job
+		self.log = OptimizerLog(job)
 		self.optimizer = SPSA(maxiter=max_iter, callback=self.log.update)
 		self.qc_index = qc_index
 
@@ -60,19 +61,28 @@ class QVCAutoencoder:
 		return cost
 
 
-	def train(self, initial_point, job=None, is_binary=False):
+	def train(self, initial_point, is_binary=False):
 		if is_binary:
 			loss_func = self.loss_function_binary
 		else:
 			loss_func = self.loss_function_multiclass
 
+		print(f"Training Started. \n Data points in Data set: {self.n_samples} \n Max Iter: {self.max_iter}")
+		
 		result = self.optimizer.minimize(loss_func, initial_point)
 		opt_theta = result.x
 		min_cost = result.fun
 
-		# TODO: use job and save opt-theta, return data path
-		print(f"optimal theta values: {opt_theta}; min_cost: {min_cost}")
-		return opt_theta, min_cost
+		if is_binary:
+			path = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/loss_{round(min_cost, 5)}.txt"
+		else:
+			path = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/loss_{round(min_cost, 5)}.txt"
+		result_path = os.path.join(dirname, path)
+		f = open(result_path, 'a')
+		for theta in opt_theta:
+			f.write(str(theta)+"\n")
+		f.close()
+		return result_path
 
 
 	def eval(self, theta, test_data, is_binary=False):

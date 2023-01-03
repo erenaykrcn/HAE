@@ -7,6 +7,9 @@ import sys
 sys.path.append(os.path.join(dirname, '../../'))
 from modules.qnn.utils import PQC
 
+sys.path.append(os.path.join(dirname, '../../../HAE_demonstrator'))
+from train.models import TrainJob
+
 
 def parity(bitstring):
 	"""Returns 1 if parity of `bitstring` is even, otherwise 0."""
@@ -15,7 +18,7 @@ def parity(bitstring):
 
 
 def assign_parameters(x_data, theta, qc_index):
-	pqc = PQC(Aer.get_backend("aer_simulator"), 100, qc_index)
+	pqc = PQC(backend=Aer.get_backend("aer_simulator"), shots=100, qc_index=qc_index)
 	return pqc.assign_parameters(x_data, theta)
 
 
@@ -32,21 +35,31 @@ def sum_to_probability(result, is_binary):
 
 def get_classification_probabilities(x_data, theta, qc_index, is_binary=False):
 	circuits = [assign_parameters(x, theta, qc_index) for x in x_data]
+	for circuit in circuits:
+		circuit.measure_all()
 	results = execute(circuits, Aer.get_backend("aer_simulator")).result()
 	return [sum_to_probability(results.get_counts(c), is_binary) for c in circuits]
 
 
 class OptimizerLog():
-	def __init__(self):
+	def __init__(self, job=None):
 		self.evaluations = []
 		self.theta_values = []
 		self.costs = []
+		self.job = job
 	def update(self, evaluation, theta, cost, _stepsize, _accept):
 		self.evaluations.append(evaluation)
 		self.theta_values.append(theta)
 		self.costs.append(cost)
-
 		print("Evaluations: " + str(evaluation) + "|| Loss: " + str(cost))
+
+		if self.job:
+			train_job = TrainJob.objects.get(id=self.job["id"])
+			loss_string = train_job.loss_string if train_job.loss_string else ""
+			loss_string += str(round(cost, 3)) + ";"
+			train_job.loss_string = loss_string
+			train_job.save()
+
 
 
 def get_label(bitstring):
