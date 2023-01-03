@@ -60,7 +60,7 @@ class QVCAutoencoder:
 		return cost
 
 
-	def train(self, initial_point, job=None, sis_binary=False):
+	def train(self, initial_point, job=None, is_binary=False):
 		if is_binary:
 			loss_func = self.loss_function_binary
 		else:
