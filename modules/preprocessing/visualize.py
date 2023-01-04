@@ -72,8 +72,12 @@ def plot_PCA_2D(n_samples=200, test_data=None, test_labels=None, path_save=""):
     cae.load_state_dict(torch.load(os.path.join(dirname, path)))
     cae.eval()
 
-    if not test_data or not test_labels:
-        test_data, test_labels = sample_test_data(n_samples, True)
+    try:
+        if test_data == None or test_labels == None:
+            test_data, test_labels = sample_test_data(n_samples, True)
+    except ValueError:
+        pass
+
     test_data_latent = cae.get_latent_space_state(Variable(torch.FloatTensor(test_data))).tolist()
     test_data = project_to_2D(test_data_latent)
 
@@ -86,17 +90,23 @@ def plot_PCA_2D(n_samples=200, test_data=None, test_labels=None, path_save=""):
     y_values = np.array(y_values)
     test_labels = np.array(test_labels)
 
+    color = np.where(test_labels==1, "Normal Data", "Anomaly")
+    if 2 in test_labels or -2 in test_labels:
+        color[np.where(test_labels==-1)] = "Undisc. Anomaly"
+        color[np.where(test_labels==2)] = "True Disc. Anomaly"
+        color[np.where(test_labels==-2)] = "False Disc. Anomaly"
     df = pd.DataFrame(dict(
             Principal_Component_1 = x_values,
             Principal_Component_2 = y_values,
-            color= np.where(test_labels==1.0, "Normal Data", "Anomaly")
+            color= color,
         ))
+
     fig = px.scatter(df, x='Principal_Component_1', y='Principal_Component_2', color='color',
                     title="PCA Projection of the Test Data"
         )
 
     if path_save:
-        fig.write_image(path_save)
+        fig.write_image(path_save, width=800, height=500)
     else:
         fig.write_image(f"2D-plot-n_samples-{n_samples}.png")
     return fig
