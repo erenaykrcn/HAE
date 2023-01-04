@@ -74,11 +74,19 @@ class QVCAutoencoder:
 		min_cost = result.fun
 
 		if is_binary:
+			directory = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/"
 			path = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/loss_{round(min_cost, 5)}.txt"
 		else:
+			directory = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/"
 			path = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/loss_{round(min_cost, 5)}.txt"
 		result_path = os.path.join(dirname, path)
-		f = open(result_path, 'a')
+
+		try:
+			f = open(result_path, 'a')
+		except FileNotFoundError: 
+			os.makedirs(os.path.join(dirname, directory))
+			f = open(result_path, 'a')
+
 		for theta in opt_theta:
 			f.write(str(theta)+"\n")
 		f.close()

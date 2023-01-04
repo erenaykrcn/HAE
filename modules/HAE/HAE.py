@@ -112,11 +112,19 @@ class HAE(nn.Module):
 
 		path = ''
 		if self.qc_index:
+			directory =  f'../../data/training_results/pqc{self.qc_index}/'
 			path = f'../../data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt'
 		elif self.custom_qc:
+			directory = f'../../data/training_results/custom_qc/'
 			path = f'../../data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
+		abs_path = os.path.join(dirname, path)
 
-		torch.save(best_params, os.path.join(dirname, path))
+		try:
+			torch.save(best_params, abs_path)
+		except RuntimeError: 
+			os.makedirs(os.path.join(dirname, directory))
+			torch.save(best_params, abs_path)
+		
 
 		if train_job:
 			train_job.status = "completed"
