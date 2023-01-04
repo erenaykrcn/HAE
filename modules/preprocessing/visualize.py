@@ -1,20 +1,19 @@
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+import plotly.express as px
+import pandas as pd
 from sklearn.decomposition import PCA
 
 dirname = os.path.dirname(__file__)
 import sys
-sys.path.append(os.path.join(dirname, './'))
-from preprocessing import preprocess, sample_training_data
+sys.path.append(os.path.join(dirname, '../../'))
+from modules.preprocessing.preprocessing import preprocess, sample_training_data, sample_test_data
+from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
 
 import torch
 from torch.autograd import Variable
 
-import sys
-sys.path.append(os.path.join(dirname, '..\\..\\'))
-from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
-from modules.preprocessing.preprocessing import sample_test_data
 
 
 def visualize_test_data(label, data_index):
@@ -67,13 +66,14 @@ def project_to_2D(x):
     return principalComponents
 
 
-def plot_PCA_2D(n_samples):
+def plot_PCA_2D(n_samples=200, test_data=None, test_labels=None, path_save=""):
     path = f'../../data/training_results/classical/training_result_loss_0.022.pt'
     cae = ClassicalAutoencoder()
     cae.load_state_dict(torch.load(os.path.join(dirname, path)))
     cae.eval()
 
-    test_data, test_labels = sample_test_data(n_samples, True)
+    if not test_data or not test_labels:
+        test_data, test_labels = sample_test_data(n_samples, True)
     test_data_latent = cae.get_latent_space_state(Variable(torch.FloatTensor(test_data))).tolist()
     test_data = project_to_2D(test_data_latent)
 
@@ -86,20 +86,17 @@ def plot_PCA_2D(n_samples):
     y_values = np.array(y_values)
     test_labels = np.array(test_labels)
 
-    fig = plt.figure(figsize = (8,8))
-    ax = fig.add_subplot(1,1,1) 
-    ax.set_xlabel('Principal Component 1', fontsize = 15)
-    ax.set_ylabel('Principal Component 2', fontsize = 15)
-    ax.set_title('2 component PCA of Test Data', fontsize = 20)
+    df = pd.DataFrame(dict(
+            Principal_Component_1 = x_values,
+            Principal_Component_2 = y_values,
+            color= np.where(test_labels==1.0, "Normal Data", "Anomaly")
+        ))
+    fig = px.scatter(df, x='Principal_Component_1', y='Principal_Component_2', color='color',
+                    title="PCA Projection of the Test Data"
+        )
 
-    anomalies = ax.scatter(x_values[np.where(test_labels==-1.0)]
-                   , y_values[np.where(test_labels==-1.0)]
-                   , c = 'r'
-                   , s = 50)
-    normal = ax.scatter(x_values[np.where(test_labels==1.0)]
-                   , y_values[np.where(test_labels==1.0)]
-                   , c = 'g'
-                   , s = 50)
-    ax.legend((anomalies, normal), ('Anomaly', 'Normal Data'))
-    ax.grid()
-    fig.savefig(f"2D-plot-n_samples-{n_samples}.png")
+    if path_save:
+        fig.write_image(path_save)
+    else:
+        fig.write_image(f"2D-plot-n_samples-{n_samples}.png")
+    return fig

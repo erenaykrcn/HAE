@@ -18,8 +18,7 @@ def get_scores(predict, labels):
 	return (f1, precision, recall)
 
 
-# TODO: Delete this part after testing is over
-from predict import predict_HAE, predict_classical, predict_ADL, predict_QVC
+"""from predict import predict_HAE, predict_classical, predict_ADL, predict_QVC
 
 predict, labels = predict_HAE(qc_index = 2, loss_value = 0.022, n_samples=500)
 f1, precision, recall = get_scores(predict, labels)
@@ -39,4 +38,4 @@ print(f"CLASSICAL: f1: {f1}; precision: {precision}; recall: {recall}")
 predict, labels = predict_QVC(qc_index = 9, loss_value = 0.394, n_samples=500, is_binary=True)
 f1, precision, recall = get_scores(predict, labels)
 
-print(f"QVC_LOSS: f1: {f1}; precision: {precision}; recall: {recall}")
+print(f"QVC_LOSS: f1: {f1}; precision: {precision}; recall: {recall}")"""

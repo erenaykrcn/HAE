@@ -11,8 +11,8 @@ import os
 dirname = os.path.dirname(__file__)
 
 import sys
-sys.path.append(os.path.join(dirname, '../preprocessing'))
-from preprocessing import preprocess, sample_training_data
+sys.path.append(os.path.join(dirname, '../../'))
+from modules.preprocessing.preprocessing import preprocess, sample_training_data
 
 
 class ClassicalAutoencoder(nn.Module):

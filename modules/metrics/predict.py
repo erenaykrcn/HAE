@@ -8,21 +8,22 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 
 import sys
-sys.path.append(os.path.join(dirname, '..\\..\\'))
-from modules.HAE.HAE import HAE
-from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
-from modules.preprocessing.preprocessing import preprocess, sample_training_data, sample_test_data, sample_vqc_training_data
-from modules.AD_loss_autoencoder.AD_loss_autoencoder import ADLossAutoencoder
-from modules.QVC_autoencoder.QVC_autoencoder import QVCAutoencoder
+sys.path.append(os.path.join(dirname, '../'))
+from HAE.HAE import HAE
+from classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from preprocessing.preprocessing import preprocess, sample_training_data, sample_test_data
+from AD_loss_autoencoder.AD_loss_autoencoder import ADLossAutoencoder
+from QVC_autoencoder.QVC_autoencoder import QVCAutoencoder
 
 
-def predict_HAE(qc_index = 2, loss_value = 0.022, n_samples = 100):
+def predict_HAE(qc_index = 2, loss_value = 0.022, n_samples = 100, test_data=None, test_labels=None):
 	path = f'../../data/training_results/pqc{qc_index}/training_result_loss_{loss_value}.pt'
 	hae = HAE(qc_index=qc_index)
 	hae.load_state_dict(torch.load(os.path.join(dirname, path)))
 	hae.eval()
 
-	test_data, test_labels = sample_test_data(n_samples, True)
+	if not test_data or not test_labels:
+		test_data, test_labels = sample_test_data(n_samples, True)
 	test_data = Variable(torch.FloatTensor(test_data))
 
 	train_data = Variable(torch.FloatTensor(sample_training_data(1000)[0]))
@@ -36,13 +37,14 @@ def predict_HAE(qc_index = 2, loss_value = 0.022, n_samples = 100):
 	return (predict_HAE, test_labels)
 
 
-def predict_classical(n_samples = 100):
+def predict_classical(n_samples = 100, test_data=None, test_labels=None):
 	path = f'../../data/training_results/classical/training_result_loss_0.022.pt'
 	cae = ClassicalAutoencoder()
 	cae.load_state_dict(torch.load(os.path.join(dirname, path)))
 	cae.eval()
 
-	test_data, test_labels = sample_test_data(n_samples, True)
+	if not test_data or not test_labels:
+		test_data, test_labels = sample_test_data(n_samples, True)
 	test_data = Variable(torch.FloatTensor(test_data))
 	train_data = Variable(torch.FloatTensor(sample_training_data(1000)[0]))
 
@@ -55,13 +57,14 @@ def predict_classical(n_samples = 100):
 	return (predict, test_labels)
 
 
-def predict_ADL(qc_index = 2, loss_value = 1.003, n_samples = 100):
+def predict_ADL(qc_index = 2, loss_value = 1.003, n_samples = 100, test_data=None, test_labels=None):
 	path = f'../../data/training_results_ADLoss/pqc{qc_index}/training_result_loss_{loss_value}.pt'
 	adl_ae = ADLossAutoencoder(qc_index=qc_index)
 	adl_ae.hybrid.load_state_dict(torch.load(os.path.join(dirname, path)))
 	adl_ae.hybrid.eval()
 
-	test_data, test_labels = sample_test_data(n_samples, True)
+	if not test_data or not test_labels:
+		test_data, test_labels = sample_test_data(n_samples, True)
 	test_data = Variable(torch.FloatTensor(test_data))
 
 	predict = []
@@ -71,7 +74,7 @@ def predict_ADL(qc_index = 2, loss_value = 1.003, n_samples = 100):
 	return (predict, test_labels)
 
 
-def predict_QVC(qc_index = 9, loss_value = 1.194, n_samples = 100, is_binary=False):
+def predict_QVC(qc_index = 9, loss_value = 1.194, n_samples = 100, is_binary=False, test_data=None, test_labels=None):
 	if is_binary:
 		path = f"../../data/training_results_QVC/{'zzfeaturemap_twolocal' if qc_index == 9 else 'pqc' + str(qc_index)}/binary_cl/loss_{loss_value}.txt"
 	else:
@@ -81,7 +84,8 @@ def predict_QVC(qc_index = 9, loss_value = 1.194, n_samples = 100, is_binary=Fal
 	with open(os.path.join(dirname, path), 'r') as f:
 		[theta.append(float(line)) for line in f.readlines()]
 
-	test_data, test_labels = sample_test_data(n_samples, True)
+	if not test_data or not test_labels:
+		test_data, test_labels = sample_test_data(n_samples, True)
 	test_data = Variable(torch.FloatTensor(test_data))
 
 	qvc = QVCAutoencoder(qc_index=qc_index)
