@@ -180,7 +180,8 @@ class PQC:
 	def draw(self, path=""):
 		path = path if path else f"./qcircuits/circuit_images/pqc{qc_index if self.qc_index else '_custom'}.png"
 		self._circuit.decompose().draw(output="mpl").savefig(os.path.join(dirname, path), dpi=300, transparent=True)
-
+		plt.clf()
+		
 	def circuit(self):
 		return self._circuit
 
