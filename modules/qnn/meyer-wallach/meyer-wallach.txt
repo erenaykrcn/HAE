@@ -9,3 +9,9 @@ MW-Measure of PQC8: (1.126e-16-6.589e-19j)
 MW-Measure of PQC9: (0.81-2.755e-19j)
 
 
+MW-Measure of PQC Custom: -0j
+MW-Measure of PQC Custom: 0j
+MW-Measure of PQC Custom: -0j
+MW-Measure of PQC Custom: (0.52-0j)
+MW-Measure of PQC Custom: (0.812-0j)
+MW-Measure of PQC Custom: (0.59+0j)

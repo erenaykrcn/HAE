@@ -17,8 +17,8 @@ def parity(bitstring):
 	return (hamming_weight+1) % 2
 
 
-def assign_parameters(x_data, theta, qc_index):
-	pqc = PQC(backend=Aer.get_backend("aer_simulator"), shots=100, qc_index=qc_index)
+def assign_parameters(x_data, theta, qc_index, custom_qc):
+	pqc = PQC(backend=Aer.get_backend("aer_simulator"), shots=100, qc_index=qc_index, custom_qc=custom_qc)
 	return pqc.assign_parameters(x_data, theta)
 
 
@@ -33,8 +33,8 @@ def sum_to_probability(result, is_binary):
 	return probabilities
 
 
-def get_classification_probabilities(x_data, theta, qc_index, is_binary=False):
-	circuits = [assign_parameters(x, theta, qc_index) for x in x_data]
+def get_classification_probabilities(x_data, theta, qc_index, custom_qc, is_binary=False):
+	circuits = [assign_parameters(x, theta, qc_index, custom_qc) for x in x_data]
 	for circuit in circuits:
 		circuit.measure_all()
 	results = execute(circuits, Aer.get_backend("aer_simulator")).result()
@@ -52,6 +52,14 @@ class OptimizerLog():
 		self.theta_values.append(theta)
 		self.costs.append(cost)
 		print("Evaluations: " + str(evaluation) + "|| Loss: " + str(cost))
+
+		if evaluation % 51 == 0:
+			path = f"../../data/training_results_QVC/middle_results/loss_{round(cost, 5)}.txt"
+			result_path = os.path.join(dirname, path)
+			f = open(result_path, 'a')
+			for t in theta:
+				f.write(str(t)+"\n")
+			f.close()
 
 		if self.job:
 			train_job = TrainJob.objects.get(id=self.job["id"])

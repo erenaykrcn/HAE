@@ -15,7 +15,7 @@ from modules.QVC_autoencoder.utils import OptimizerLog, get_classification_proba
 
 
 class QVCAutoencoder:
-	def __init__(self, qc_index, job=None, max_iter=100, loss_value_classical=0.023, n_samples=150):
+	def __init__(self, qc_index=0, custom_qc={}, job=None, max_iter=100, loss_value_classical=0.023, n_samples=150):
 		path_cl = f'../../data/training_results/classical/training_result_loss_{loss_value_classical}.pt'
 		self.cae = ClassicalAutoencoder()
 		self.cae.load_state_dict(torch.load(os.path.join(dirname, path_cl)))
@@ -31,6 +31,7 @@ class QVCAutoencoder:
 		self.log = OptimizerLog(job)
 		self.optimizer = SPSA(maxiter=max_iter, callback=self.log.update)
 		self.qc_index = qc_index
+		self.custom_qc = custom_qc
 
 
 	def loss_function_multiclass(self, theta):
@@ -38,7 +39,7 @@ class QVCAutoencoder:
 		x, labels = sample_vqc_training_data(self.n_samples, True)
 		x = self.cae.get_latent_space_state(Variable(torch.FloatTensor(x))).tolist()
 
-		classifications = get_classification_probabilities(x,theta, self.qc_index)
+		classifications = get_classification_probabilities(x,theta, self.qc_index, self.custom_qc)
 		for i, classification in enumerate(classifications):
 			p = classification.get(labels[i])
 			cost += -np.log(p + 1e-10)
@@ -53,7 +54,7 @@ class QVCAutoencoder:
 		labels = np.where(labels>3, 1, 0)
 		x = self.cae.get_latent_space_state(Variable(torch.FloatTensor(x))).tolist()
 
-		classifications = get_classification_probabilities(x,theta, self.qc_index, True)
+		classifications = get_classification_probabilities(x,theta, self.qc_index, self.custom_qc, True)
 		for i, classification in enumerate(classifications):
 			p = classification.get(labels[i])
 			cost += -np.log(p + 1e-10)
@@ -73,12 +74,16 @@ class QVCAutoencoder:
 		opt_theta = result.x
 		min_cost = result.fun
 
-		if is_binary:
-			directory = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/"
-			path = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/loss_{round(min_cost, 5)}.txt"
-		else:
-			directory = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/"
-			path = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/loss_{round(min_cost, 5)}.txt"
+		if self.qc_index:
+			if is_binary:
+				directory = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/"
+				path = f"../../data/training_results_QVC/pqc{self.qc_index}/binary_cl/loss_{round(min_cost, 5)}.txt"
+			else:
+				directory = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/"
+				path = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/loss_{round(min_cost, 5)}.txt"
+		elif self.custom_qc:
+			directory = f"../../data/training_results_QVC/custom/{'binary_cl' if is_binary else 'multi_cl'}/"
+			path = f"../../data/training_results_QVC/custom/{'binary_cl' if is_binary else 'multi_cl'}/loss_{round(min_cost, 5)}.txt"
 		result_path = os.path.join(dirname, path)
 
 		try:
@@ -96,7 +101,7 @@ class QVCAutoencoder:
 	def eval(self, theta, test_data, is_binary=False):
 		x = self.cae.get_latent_space_state(Variable(torch.FloatTensor(test_data))).tolist()
 
-		probs = get_classification_probabilities(x,theta, self.qc_index, is_binary)
+		probs = get_classification_probabilities(x,theta, self.qc_index, self.custom_qc, is_binary)
 
 		if is_binary:
 			predictions = [-1 if p[0] >= p[1] else 1 for p in probs]
