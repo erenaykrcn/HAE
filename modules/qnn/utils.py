@@ -132,6 +132,7 @@ class PQC:
 						entanglement=custom_qc["ansatz_params"]["entanglement"]
 						)
 
+			# TODO!!
 			N_PARAMS["custom"] = ansatz.num_parameters
 			AD_HOC_CIRCUIT = encoder.compose(ansatz)
 			self.x = encoder.ordered_parameters
@@ -203,7 +204,7 @@ def sim_expr(qc_index=0, custom_qc={}, path_custom=""):
 	qc = PQC(qc_index=qc_index, custom_qc=custom_qc, backend=backend, shots=1)
 
 	sf_array = []
-	for i in range(1000):
+	for i in range(10):
 		x1 = (np.random.rand(4) * 2) - 1 
 		x2 = (np.random.rand(4) * 2) - 1 
 
@@ -224,7 +225,8 @@ def sim_expr(qc_index=0, custom_qc={}, path_custom=""):
 
 		sf = round(state_fidelity(sv1, sv2), 3)
 		sf_array.append(sf)
-	haar_rand = np.random.rand(100000)
+	#haar_rand = np.random.rand(100000)
+	haar_rand = np.random.rand(100)
 
 	n_haar, bins_haar, patches_haar = plt.hist(haar_rand, 100, density=True, color="b", label="Haar", alpha=0.7)
 	n_pqc, bins_pqc, patches_pqc = plt.hist(sf_array, 100, density=True, color="orange", label="PQC", alpha=0.7)
@@ -252,7 +254,7 @@ def meyer_wallach_measure(qc_index=0, custom_qc={}):
 	qc = PQC(qc_index=qc_index, custom_qc=custom_qc, backend=backend, shots=1)
 
 	cap_sum = 0
-	for i in range(1000):
+	for i in range(10):
 		x = (np.random.rand(4) * 2) - 1
 		theta = ( np.random.rand(N_PARAMS[qc_index if qc_index else "custom"]) * np.pi * 2 ) - np.pi
 

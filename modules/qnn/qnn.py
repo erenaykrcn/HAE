@@ -20,6 +20,8 @@ def create_qnn(backend, qc_index=0, custom_qc={}):
 		it delivers a Quantum Neural Network from
 		Qiskit's CircuitQNN Class.
 	"""
+
+	# TODO!!
 	n_theta = 4
 	if qc_index:
 		n_theta = N_PARAMS[qc_index]
