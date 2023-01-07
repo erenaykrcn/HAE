@@ -131,9 +131,8 @@ class PQC:
 						reps=int(custom_qc["ansatz_params"]["reps"]) if "reps" in custom_qc["ansatz_params"].keys() else 2, skip_final_rotation_layer=custom_qc["ansatz_params"]["skip_final_rotation_layer"],
 						entanglement=custom_qc["ansatz_params"]["entanglement"]
 						)
-
-			# TODO!!
 			N_PARAMS["custom"] = ansatz.num_parameters
+			self.num_parameters = ansatz.num_parameters
 			AD_HOC_CIRCUIT = encoder.compose(ansatz)
 			self.x = encoder.ordered_parameters
 			self.theta = ansatz.ordered_parameters
