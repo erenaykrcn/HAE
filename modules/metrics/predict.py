@@ -16,8 +16,8 @@ from AD_loss_autoencoder.AD_loss_autoencoder import ADLossAutoencoder
 from QVC_autoencoder.QVC_autoencoder import QVCAutoencoder
 
 
-def predict_HAE(qc_index, path, n_samples = 100, test_data=None, test_labels=None):
-	hae = HAE(qc_index=qc_index)
+def predict_HAE(qc_index, path, n_samples = 100, test_data=None, test_labels=None, custom_dict={}):
+	hae = HAE(qc_index=qc_index, custom_qc=custom_dict)
 	hae.load_state_dict(torch.load(path))
 	hae.eval()
 	
@@ -74,7 +74,7 @@ def predict_ADL(qc_index = 2, loss_value = 1.003, n_samples = 100, test_data=Non
 	return (predict, test_labels)
 
 
-def predict_QVC(qc_index, path, n_samples = 100, is_binary=True, test_data=None, test_labels=None):
+def predict_QVC(qc_index, path, n_samples = 100, is_binary=True, test_data=None, test_labels=None, custom_dict={}):
 	theta = []
 	with open(path, 'r') as f:
 		[theta.append(float(line)) for line in f.readlines()]
@@ -83,7 +83,7 @@ def predict_QVC(qc_index, path, n_samples = 100, is_binary=True, test_data=None,
 		test_data, test_labels = sample_test_data(n_samples, True)
 	test_data = Variable(torch.FloatTensor(test_data))
 
-	qvc = QVCAutoencoder(qc_index=qc_index)
+	qvc = QVCAutoencoder(qc_index=qc_index, custom_qc=custom_dict)
 	predict = qvc.eval(theta, test_data, is_binary)
 
 	return (predict, test_labels)

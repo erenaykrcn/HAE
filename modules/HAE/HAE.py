@@ -85,6 +85,7 @@ class HAE(nn.Module):
 		train_job = None
 		if job:
 			train_job = TrainJob.objects.get(id=job["id"])
+			custom_pqc_job = train_job.customCircuitJob
 
 		for epoch in range(epochs):
 			total_loss = []
@@ -116,7 +117,7 @@ class HAE(nn.Module):
 			path = f'../../data/training_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt'
 		elif self.custom_qc:
 			directory = f'../../data/training_results/custom_qc/'
-			path = f'../../data/training_results/custom_qc/training_result_loss_{round(min_loss, 3)}.pt'
+			path = f'../../data/training_results/custom_qc/custom_{custom_pqc_job.id}_loss_{round(min_loss, 3)}.pt'
 		abs_path = os.path.join(dirname, path)
 
 		try:

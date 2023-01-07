@@ -83,12 +83,12 @@ class QVCAutoencoder:
 				path = f"../../data/training_results_QVC/pqc{self.qc_index}/multi_cl/loss_{round(min_cost, 5)}.txt"
 		elif self.custom_qc:
 			directory = f"../../data/training_results_QVC/custom/{'binary_cl' if is_binary else 'multi_cl'}/"
-			path = f"../../data/training_results_QVC/custom/{'binary_cl' if is_binary else 'multi_cl'}/loss_{round(min_cost, 5)}.txt"
+			path = f"../../data/training_results_QVC/custom/{'binary_cl' if is_binary else 'multi_cl'}/custom_{custom_pqc_job.id}_loss_{round(min_cost, 5)}.txt"
 		result_path = os.path.join(dirname, path)
 
 		try:
 			f = open(result_path, 'a')
-		except FileNotFoundError: 
+		except FileNotFoundError:
 			os.makedirs(os.path.join(dirname, directory))
 			f = open(result_path, 'a')
 
