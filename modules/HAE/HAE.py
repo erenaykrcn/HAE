@@ -111,6 +111,20 @@ class HAE(nn.Module):
 				best_params = self.state_dict()
 				min_loss = average_loss
 
+			# Save middle results
+			if epoch % 20 == 0:
+				if self.qc_index:
+					directory = f"../../data/training_results/middle_results/pqc{self.qc_index}/"
+					path = f"../../data/training_results/middle_results/pqc{self.qc_index}/training_result_loss_{round(min_loss, 3)}.pt"
+				elif self.custom_qc:
+					directory = f"../../data/training_results/middle_results/custom_qc/"
+					path = f"../../data/training_results/middle_results/custom_qc/custom_{custom_pqc_job.id}_loss_{round(min_loss, 3)}.pt"
+				try:
+					torch.save(best_params, os.path.join(dirname, path))
+				except RuntimeError:
+					os.makedirs(os.path.join(dirname, directory))
+					torch.save(best_params, os.path.join(dirname, path))
+
 		path = ''
 		if self.qc_index:
 			directory =  f'../../data/training_results/pqc{self.qc_index}/'

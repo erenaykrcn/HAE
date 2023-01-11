@@ -13,6 +13,9 @@ from modules.classical_autoencoder.classical_autoencoder import ClassicalAutoenc
 from modules.preprocessing.preprocessing import preprocess, sample_training_data, sample_vqc_training_data
 from modules.QVC_autoencoder.utils import OptimizerLog, get_classification_probabilities
 
+sys.path.append(os.path.join(dirname, '../../../HAE_demonstrator'))
+from train.models import TrainJob
+
 
 class QVCAutoencoder:
 	def __init__(self, qc_index=0, custom_qc={}, job=None, max_iter=100, loss_value_classical=0.023, n_samples=150):
@@ -73,6 +76,10 @@ class QVCAutoencoder:
 		result = self.optimizer.minimize(loss_func, initial_point)
 		opt_theta = result.x
 		min_cost = result.fun
+
+		if self.job:
+			train_job = TrainJob.objects.get(id=self.job["id"])
+			custom_pqc_job = self.job.customCircuitJob
 
 		if self.qc_index:
 			if is_binary:
