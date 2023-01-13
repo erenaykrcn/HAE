@@ -65,7 +65,7 @@ class HAE(nn.Module):
 
 	def trainReconstruction(self, job=None, epochs=None, n_samples=None):
 		"""
-			The model is trained based on a mean 
+			The model is trained based on a mean
 			square root reconstruction loss.
 		"""
 		epochs = epochs if epochs else self.epochs

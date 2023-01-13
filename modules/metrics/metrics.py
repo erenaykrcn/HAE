@@ -16,3 +16,4 @@ def get_scores(predict, labels):
 	f1 = stats.hmean([precision, recall])
 
 	return (f1, precision, recall)
+

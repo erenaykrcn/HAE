@@ -1,5 +1,4 @@
-from classical_autoencoder import ClassicalAutoencoder
+from classical_binary_classifier import BinaryClassification
 
-
-ae = ClassicalAutoencoder()
-ae.trainClassical()
+model = BinaryClassification()
+model.trainBinary()

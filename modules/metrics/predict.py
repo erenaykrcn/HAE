@@ -11,6 +11,7 @@ import sys
 sys.path.append(os.path.join(dirname, '../'))
 from HAE.HAE import HAE
 from classical_autoencoder.classical_autoencoder import ClassicalAutoencoder
+from classical_autoencoder.classical_binary_classifier import BinaryClassification
 from preprocessing.preprocessing import preprocess, sample_training_data, sample_test_data
 from AD_loss_autoencoder.AD_loss_autoencoder import ADLossAutoencoder
 from QVC_autoencoder.QVC_autoencoder import QVCAutoencoder
@@ -52,6 +53,28 @@ def predict_classical(n_samples = 100, test_data=None, test_labels=None):
 
 	if_model = IsolationForest().fit(train_data_latent.tolist())
 	predict = if_model.predict(test_data_latent.tolist())
+
+	return (predict, test_labels)
+
+
+def predict_classical_binary_cl(n_samples = 100, test_data=None, test_labels=None):
+	path_cae = f'../../data/training_results/classical/training_result_loss_0.022.pt'
+	cae = ClassicalAutoencoder()
+	cae.load_state_dict(torch.load(os.path.join(dirname, path_cae)))
+	cae.eval()
+
+	path_cl = f'../../data/training_results/classical_binary_cl/training_result_loss_0.043.pt'
+	model = BinaryClassification()
+	model.load_state_dict(torch.load(os.path.join(dirname, path_cl)))
+	model.eval()
+
+	if (test_data==None) or (test_labels==None):
+		test_data, test_labels = sample_test_data(n_samples, True)
+	test_data = Variable(torch.FloatTensor(test_data))
+
+	test_data_latent = cae.get_latent_space_state(test_data)
+	predict = model(test_data_latent).detach().numpy()
+	predict = np.squeeze(np.where(predict<0.5, -1, 1))
 
 	return (predict, test_labels)
 
