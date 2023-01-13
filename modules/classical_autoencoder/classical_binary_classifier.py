@@ -15,7 +15,7 @@ from modules.preprocessing.preprocessing import sample_vqc_training_data
 
 
 class BinaryClassification(nn.Module):
-	def __init__(self, learning_rate=0.005, epochs=500, n_samples=200, loss_value_classical=0.023):
+	def __init__(self, learning_rate=0.005, epochs=600, n_samples=500, loss_value_classical=0.023):
 		super(BinaryClassification, self).__init__()
 		# Number of input features is 4.
 		self.layer = nn.Sequential( nn.Linear(4,3),

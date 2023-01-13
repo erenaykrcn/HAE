@@ -63,7 +63,7 @@ def predict_classical_binary_cl(n_samples = 100, test_data=None, test_labels=Non
 	cae.load_state_dict(torch.load(os.path.join(dirname, path_cae)))
 	cae.eval()
 
-	path_cl = f'../../data/training_results/classical_binary_cl/training_result_loss_0.037.pt'
+	path_cl = f'../../data/training_results/classical_binary_cl/training_result_loss_0.098.pt'
 	model = BinaryClassification()
 	model.load_state_dict(torch.load(os.path.join(dirname, path_cl)))
 	model.eval()
