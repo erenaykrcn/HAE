@@ -85,7 +85,7 @@ class HAE(nn.Module):
 		train_job = None
 		if job:
 			train_job = TrainJob.objects.get(id=job["id"])
-			custom_pqc_job = train_job["customCircuitJob"]
+			custom_pqc_job = train_job.customCircuitJob
 
 		for epoch in range(epochs):
 			total_loss = []

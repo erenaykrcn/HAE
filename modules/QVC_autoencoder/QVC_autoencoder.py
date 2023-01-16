@@ -79,7 +79,7 @@ class QVCAutoencoder:
 
 		if self.job:
 			train_job = TrainJob.objects.get(id=self.job["id"])
-			custom_pqc_job = self["job.customCircuitJob"]
+			custom_pqc_job =  train_job.customCircuitJob
 
 		if self.qc_index:
 			if is_binary:
