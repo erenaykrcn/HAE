@@ -66,7 +66,7 @@ class PQC:
 			"""
 				Custom QC dictionary have to specify the encoder and ansatz.
 				
-				Encoder choices (from least to most primitive-usage of PauliFeatureMap is adviced):
+				Encoder choices (from least to most primitive; Usage of PauliFeatureMap is adviced):
 					-> ZFeatureMap(reps=2)
 					-> ZZFeatureMap(reps=2)
 					-> PauliFeatureMap(reps=2, entanglement=("full", "linear", "circular", "reverse_linear", "pairwise", "sca") or 
@@ -79,7 +79,7 @@ class PQC:
 						skip_final_rotation_layer=False
 						)
 				
-				Ansatz choices (from least to most primitive-usage of TwoLocal is adviced):
+				Ansatz choices (from least to most primitive; Usage of TwoLocal is adviced):
 					-> RealAmplitudes(entanglement=("full", "linear", "circular", "reverse_linear", "pairwise", "sca") or 
 						  	[(0, 1), (1, 2), (2, 0),...]  or [entangler_map_layer_1, entangler_map_layer_2,...],
 							reps=3, skip_unentangled_qubits=False, 
